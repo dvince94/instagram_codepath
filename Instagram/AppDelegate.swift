@@ -17,17 +17,45 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
         // Override point for customization after application launch.
-
+        let parse_id = "Instagram"
+        let parse_client = "fadfjasljonalnalklg"
+        let parse_server = "https://protected-refuge-95709.herokuapp.com/parse"
+        
         // Initialize Parse
         // Set applicationId and server based on the values in the Heroku settings.
         // clientKey is not used on Parse open source unless explicitly configured
         Parse.initializeWithConfiguration(
             ParseClientConfiguration(block: { (configuration:ParseMutableClientConfiguration) -> Void in
-                configuration.applicationId = "Instagram"
-                configuration.clientKey = "ajernjk3rai3hracldjlfkankakfnekl"
-                configuration.server = "https://stormy-retreat-53048.herokuapp.com/parse"
+                configuration.applicationId = parse_id
+                configuration.clientKey = parse_client
+                configuration.server = parse_server
             })
         )
+        
+        // setup parse keys
+//        Parse.setApplicationId(parse_id, clientKey: parse_client)
+        
+        // check if user is logged in.
+        if PFUser.currentUser() != nil {
+            // if there is a logged in user then load the home view controller
+            let storyboard = UIStoryboard(name: "Main", bundle: nil)
+            let vc = storyboard.instantiateViewControllerWithIdentifier("userHomepage")
+            
+            window?.rootViewController = vc
+        }
+        
+        //When user logout it will move back to initial view controller
+        NSNotificationCenter.defaultCenter().addObserverForName(UserMedia.userDidLogoutNotification, object: nil, queue: NSOperationQueue.mainQueue()) {(NSNotification) -> Void in
+            let storyboard = UIStoryboard(name: "Main", bundle: nil)
+            let vc = storyboard.instantiateInitialViewController()
+            self.window?.rootViewController = vc
+        }
+        //When user logout it will move back to initial view controller
+        NSNotificationCenter.defaultCenter().addObserverForName(UserMedia.submitImageNotification, object: nil, queue: NSOperationQueue.mainQueue()) {(NSNotification) -> Void in
+            let storyboard = UIStoryboard(name: "Main", bundle: nil)
+            let vc = storyboard.instantiateViewControllerWithIdentifier("userHomepage")
+            self.window?.rootViewController = vc
+        }
         
         return true
     }

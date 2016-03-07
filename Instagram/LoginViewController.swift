@@ -24,6 +24,10 @@ class LoginViewController: UIViewController {
         // Dispose of any resources that can be recreated.
     }
     
+    override func  preferredStatusBarStyle()-> UIStatusBarStyle {
+        return UIStatusBarStyle.LightContent
+    }
+    
     @IBAction func signIn(sender: AnyObject) {
         PFUser.logInWithUsernameInBackground(usernameField.text!, password: passwordField.text!) { (user: PFUser?, error: NSError?) -> Void in
             if user != nil {
@@ -31,6 +35,7 @@ class LoginViewController: UIViewController {
                 self.performSegueWithIdentifier("loginSegue", sender: nil)
             }
             else {
+                self.showAlertMessage("Login Error", messages: "\(error?.localizedDescription)")
                 print("\(error?.localizedDescription)")
             }
         }
@@ -39,20 +44,41 @@ class LoginViewController: UIViewController {
     @IBAction func signUp(sender: AnyObject) {
         let newUser = PFUser()
         
-        newUser.username = usernameField.text
-        newUser.password = passwordField.text
+        newUser.username = usernameField.text!
+        newUser.password = passwordField.text!
         newUser.signUpInBackgroundWithBlock { (success: Bool, error: NSError?) -> Void in
             if success {
                 print("Created a user!")
                 self.performSegueWithIdentifier("loginSegue", sender: nil)
             } else {
-                print("\(error?.localizedDescription)")
                 if error?.code == 202 {
+                    self.showAlertMessage("Sign Up Error", messages: "Username taken!")
                     print("Username taken")
+                }
+                else {
+                    self.showAlertMessage("Sign Up Error", messages: "\(error?.localizedDescription)")
+                    print("\(error?.localizedDescription) error code: \(error?.code)")
                 }
             }
         }
     }
+    
+    //Show error message
+    func showAlertMessage(titles: String, messages: String) {
+        let alertController = UIAlertController(title: "\(titles)", message: "\(messages)", preferredStyle: .Alert)
+        
+        // create an OK action
+        let OKAction = UIAlertAction(title: "OK", style: .Default) { (action) in
+            // handle response here.
+        }
+        // add the OK action to the alert controller
+        alertController.addAction(OKAction)
+        
+        presentViewController(alertController, animated: true) {
+            // optional code for what happens after the alert controller has finished presenting
+        }
+    }
+    
     /*
     // MARK: - Navigation
 
